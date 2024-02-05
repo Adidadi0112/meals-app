@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meals_app/screens/categories.dart';
 import 'package:meals_app/screens/filters.dart';
 import 'package:meals_app/screens/meals.dart';
+import 'package:meals_app/screens/newMeal.dart';
 import 'package:meals_app/widgets/main_drawer.dart';
 import 'package:meals_app/providers/favorites_provider.dart';
 import 'package:meals_app/providers/filters_provider.dart';
@@ -59,6 +60,9 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
         meals: _favoriteMeals,
       );
       activePageTitle = 'Your Favorites';
+    } else if (_selectedPageIndex == 2) {
+      activePage = const AddMealScreen();
+      activePageTitle = 'Add new meal';
     }
 
     return Scaffold(
@@ -78,6 +82,7 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
             label: 'Categories',
           ),
           BottomNavigationBarItem(icon: Icon(Icons.star), label: 'Favorites'),
+          BottomNavigationBarItem(icon: Icon(Icons.add), label: 'Add Meal')
         ],
       ),
     );
