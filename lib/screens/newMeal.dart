@@ -1,8 +1,11 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:meals_app/data/dummy_data.dart';
 import 'package:meals_app/models/meal.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../providers/meals_provider.dart';
 import '../widgets/image_input.dart';
 
 class AddMealScreen extends StatefulWidget {
@@ -16,6 +19,7 @@ class _AddMealScreenState extends State<AddMealScreen> {
   final _titleController = TextEditingController();
   final _ingredientController = TextEditingController();
   final _stepsController = TextEditingController();
+  final _durationController = TextEditingController();
 
   File? _selectedImage;
   List<String> ingredients = [];
@@ -32,6 +36,9 @@ class _AddMealScreenState extends State<AddMealScreen> {
   @override
   void dispose() {
     _titleController.dispose();
+    _ingredientController.dispose();
+    _stepsController.dispose();
+    _durationController.dispose();
     super.dispose();
   }
 
@@ -41,6 +48,7 @@ class _AddMealScreenState extends State<AddMealScreen> {
       padding: const EdgeInsets.all(8.0),
       child: SingleChildScrollView(
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               decoration: const InputDecoration(
@@ -164,6 +172,26 @@ class _AddMealScreenState extends State<AddMealScreen> {
               ),
             ),
             const SizedBox(height: 5),
+            ExpansionTile(
+              title: const Text("Select category"),
+              children: [
+                for (var category in availableCategories)
+                  CheckboxListTile(
+                    title: Text(category.title),
+                    value: categories.contains(category.id),
+                    onChanged: (bool? value) {
+                      setState(() {
+                        if (value!) {
+                          categories.add(category.id);
+                        } else {
+                          categories.remove(category.id);
+                        }
+                      });
+                    },
+                  ),
+              ],
+            ),
+            const SizedBox(height: 5),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -205,9 +233,22 @@ class _AddMealScreenState extends State<AddMealScreen> {
                 ),
               ],
             ),
+            const SizedBox(height: 5),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
+                Expanded(
+                  child: TextField(
+                    decoration: const InputDecoration(
+                      labelText: "Duration",
+                    ),
+                    controller: _durationController,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onBackground,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 5),
                 DropdownButton<Affordability>(
                   value: affordability,
                   onChanged: (Affordability? newValue) {
@@ -228,6 +269,7 @@ class _AddMealScreenState extends State<AddMealScreen> {
                     );
                   }).toList(),
                 ),
+                const SizedBox(width: 5),
                 DropdownButton<Complexity>(
                   value: complexity,
                   onChanged: (Complexity? newValue) {
@@ -249,6 +291,37 @@ class _AddMealScreenState extends State<AddMealScreen> {
                   }).toList(),
                 ),
               ],
+            ),
+            const SizedBox(height: 10),
+            Consumer(
+              builder: (context, ref, child) {
+                return ElevatedButton(
+                  onPressed: () {
+                    final mealsList = ref.read(mealsNotifier.notifier);
+                    final newMeal = Meal(
+                      id: "temp",
+                      categories: categories,
+                      title: _titleController.text,
+                      imageUrl: "",
+                      ingredients: ingredients,
+                      steps: steps,
+                      complexity: complexity,
+                      affordability: affordability,
+                      isGlutenFree: isGlutenFree,
+                      isLactoseFree: isLactoseFree,
+                      isVegan: isVegan,
+                      isVegetarian: isVegetarian,
+                      duration: duration,
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.onPrimary,
+                    minimumSize: Size(double.infinity,
+                        MediaQuery.of(context).size.height * 0.06),
+                  ),
+                  child: const Text("Add meal"),
+                );
+              },
             ),
           ],
         ),
